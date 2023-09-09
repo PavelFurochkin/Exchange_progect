@@ -1,64 +1,46 @@
 from http import HTTPStatus
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
-import Execute_from_db as Ex_db
-
-
-class HelloWorld:
-    def __init__(self, hello):
-        self.hello = hello
-
-
-Hello = HelloWorld('world')
+from Router.Router import PathRouter
+from DAO.DAO import CurrenciesDAO
 
 
 class OurHandler(BaseHTTPRequestHandler):
-    # Метод обрабатывает каждую валюту из таблицы
-    def currencies(self):
-        data = Ex_db.ExecuteBdCurrency('Exchange_base.db', 'Currencies').execute()
-        currencies_list = []
-        for currency in data:
-            current_currency = Ex_db.Currency(*currency)
-            currency_dict = {
-                'id': current_currency.id,
-                'name': current_currency.full_name,
-                'code': current_currency.code,
-                'sign': current_currency.sign
-            }
-            currencies_list.append(currency_dict)
+    def do_GET(self):
+        if self.command == 'GET':
+            data = self.get_data()
+            self.response(data)
 
-        self.send_response(HTTPStatus.OK)
+        else:
+            self.send_response(400)
+            self.end_headers()
+            self.wfile.write(b'Bad Request')
+
+    def get_data(self):
+        """ Метод возвращает определенную страницу в зависимоти от пути"""
+        path: str = PathRouter.determine_path(self.path)
+        if path[-1] == '/':
+            path_detail: tuple = PathRouter.determine_path_params(self.path)
+            data: tuple = CurrenciesDAO('Exchange_base.db').get_currency_by_code(path_detail[0])
+            response: str = json.dumps(data, indent=4, ensure_ascii=False)
+            return response
+        else:
+            data: list = CurrenciesDAO('Exchange_base.db').get_all_currencies()
+            response: str = json.dumps(
+                     data, default=lambda x: x.__dict__,
+                     indent=4, ensure_ascii=False
+                 )
+            return response
+
+    def response(self, data):
+
+        self.send_response(200)
         self.send_header('Content-Type', 'application/json; charset=UTF-8')
         self.end_headers()
-
-        response = json.dumps(currencies_list, indent=4, ensure_ascii=False)
-        self.wfile.write(response.encode('utf-8'))
-
-    def hello_page(self):
-        self.send_response(HTTPStatus.OK)
-        self.send_header('Content-Type', 'text/html; charset = UTF-8')
-        self.end_headers()
-
-        self.wfile.write('<h1>Hello World</h1>'.encode('utf-8'))
-
-    def test_page(self):
-        self.send_response(HTTPStatus.OK)
-        self.send_header('Content-Type', 'application/json')
-        self.end_headers()
-
-        json_string = json.dumps(Hello.__dict__)
-
-        self.wfile.write(bytes(json_string, 'utf-8'))
-
-    def do_GET(self):
-        if self.path == '/hello':
-            self.hello_page()
-        if self.path == '/test':
-            self.test_page()
-        if self.path == '/currencies':
-            self.currencies()
+        self.wfile.write(data.encode('utf-8'))
 
 
 if __name__ == '__main__':
     with HTTPServer(('', 8000), OurHandler) as server:
         server.serve_forever()
+
