@@ -1,11 +1,14 @@
 import sqlite3
 
-class CurrenciesDAO:
-    def __init__(self, db_name):
-        self.conn = sqlite3.connect(db_name)
-        self.create_table()
 
-    def create_table(self):
+class CurrenciesDAO:
+    db_name = 'Exchange_base1.db'
+
+    def __init__(self):
+        self.conn = sqlite3.connect(self.db_name)
+        # self.__create_table()
+
+    def __create_table(self):
         cursor = self.conn.cursor()
         cursor.execute("""CREATE TABLE IF NOT EXISTS Currencies (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
