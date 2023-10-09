@@ -9,10 +9,11 @@ from DAO.DAO import CurrenciesDAO
 class OurHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         controller: BaseController = self.initiate_controller()
-        try:
-            controller.do_GET()
-        except sqlite3.Error as error:
-            print(f'Возникла ошибка {error}')
+        controller.do_GET()
+
+    def do_POST(self):
+        controller: BaseController = self.initiate_controller()
+        controller.do_POST()
 
     def initiate_controller(self):
         """ Метод возвращает контроллер в зависимости от пути"""

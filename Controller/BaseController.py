@@ -1,41 +1,45 @@
+import json
 from abc import ABC, abstractmethod
 from http.server import BaseHTTPRequestHandler
+from http.client import HTTPException
+import sqlite3
+
 
 class BaseController(ABC):
     handler: BaseHTTPRequestHandler = None
 
     def __init__(self, handler: BaseHTTPRequestHandler):
         self.handler = handler
-        # self.handle()
-
-    def handle(self):
-        try:
-            if self.handler.command == 'GET':
-                self.do_GET()
-            elif self.handler.command == 'POST':
-                self.do_Post()
-            else:
-                self.handler.send_error(405, 'Метод не найден')
-        except Exception as error:
-            self.error_handler(error)
-
 
     @abstractmethod
     def do_GET(self):
         pass
+
     @abstractmethod
-    def do_Post(self):
+    def do_POST(self):
         pass
 
     def send(self, code: int, data):
+        json_data = json.dumps(
+                    data, default=lambda x: x.__dict__,
+                    indent=4, ensure_ascii=False
+                )
         self.handler.send_response(code)
-        self.handler.send_header('Content-Type', 'application/json; charset=UTF-8')
+        self.handler.send_header('Content-Type', 'application/json')
         self.handler.end_headers()
-        self.handler.wfile.write(data.encode('utf-8'))
+        self.handler.wfile.write(json_data.encode('utf-8'))
 
     def error_handler(self, exception):
         try:
-            if isinstance(exception, AttributeError) :
-                self.send(500, f'возникла ошибка при работе с базой данных {exception}')
+            if isinstance(exception, sqlite3.DatabaseError):
+                error_message = f'возникла ошибка при работе с базой данных {exception}'
+                self.send(500, {'error': error_message})
+            if isinstance(exception, ValueError):
+                error_message = f'Такой валюты нет в базе'
+                self.send(404, {'error': error_message})
+            if isinstance(exception, HTTPException):
+                error_message = f'Некорректный запрос'
+                self.send(400, {'error': error_message})
         except Exception as error:
-            print(f'Возникла ошибка: {error}')
+            error_message = f'Возникла ошибка {error}'
+            self.send(400, {'error': error_message})
