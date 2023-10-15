@@ -3,8 +3,9 @@ import sqlite3
 from urllib.parse import parse_qs
 from http.client import HTTPException
 
-from Controller.BaseController import BaseController
+from Controller.base_controller import BaseController
 from DAO.DAO import CurrenciesDAO
+
 
 class CurrenciesController(BaseController):
     def __init__(self, handler):
@@ -13,9 +14,12 @@ class CurrenciesController(BaseController):
         self.dao = CurrenciesDAO()
 
     def do_GET(self):
-        currencies = self.dao.get_all_currencies()
-        self.send(200, currencies)
-        self.dao.close()
+        try:
+            currencies = self.dao.get_all_currencies()
+            self.send(200, currencies)
+            self.dao.close()
+        except Exception as error:
+            self.error_handler(error)
 
 
 
@@ -31,7 +35,7 @@ class CurrenciesController(BaseController):
                 sing = form_data.get('sign','')[0]
                 if self.dao.check_code(code):
                     error = 'Такая валюта уже есть в базе'
-                    self.send(400, {'error':error})
+                    self.send(400, {'error': error})
                     return
                 else:
                     self.dao.add_currency(code, name, sing)

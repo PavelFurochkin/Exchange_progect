@@ -34,11 +34,14 @@ class BaseController(ABC):
             if isinstance(exception, sqlite3.DatabaseError):
                 error_message = f'возникла ошибка при работе с базой данных {exception}'
                 self.send(500, {'error': error_message})
-            if isinstance(exception, ValueError):
+            if isinstance(exception, (ValueError, TypeError)):
                 error_message = f'Такой валюты нет в базе'
                 self.send(404, {'error': error_message})
             if isinstance(exception, HTTPException):
                 error_message = f'Некорректный запрос'
+                self.send(400, {'error': error_message})
+            if isinstance(exception, IndexError):
+                error_message = f'Не хватает данных для выполнения'
                 self.send(400, {'error': error_message})
         except Exception as error:
             error_message = f'Возникла ошибка {error}'

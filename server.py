@@ -1,8 +1,8 @@
 import sqlite3
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-from Controller.BaseController import BaseController
-from Router.Router import PathRouter
+from Controller.base_controller import BaseController
+from Router.router import PathRouter
 from DAO.DAO import CurrenciesDAO
 
 
@@ -21,7 +21,7 @@ class OurHandler(BaseHTTPRequestHandler):
             controller_class = PathRouter.determine_controller_class_by_path(self.path)
             return controller_class(self)
         except Exception as error:
-            self.send_error(404, str(''))
+            return self.send_error(404, str(''))
 
 
 if __name__ == '__main__':

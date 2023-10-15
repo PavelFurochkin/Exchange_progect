@@ -1,8 +1,9 @@
 import json
 from http.client import HTTPException
 
-from Controller.BaseController import BaseController
+from Controller.base_controller import BaseController
 from DAO.DAO import CurrenciesDAO
+
 
 class CurrencyController(BaseController):
     def __init__(self, handler):
@@ -12,6 +13,7 @@ class CurrencyController(BaseController):
     def do_GET(self):
         try:
             code = self.handler.path.split('/')[-1]
+
             if code == '':
                 raise HTTPException
             currency = self.dao.get_currency_by_code(code)
@@ -23,4 +25,9 @@ class CurrencyController(BaseController):
             self.dao.close()
 
     def do_POST(self):
-        pass
+        try:
+            raise HTTPException
+        except Exception as error:
+            self.error_handler(error)
+        finally:
+            self.dao.close()
