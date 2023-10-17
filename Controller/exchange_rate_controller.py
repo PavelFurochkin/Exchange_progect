@@ -1,6 +1,3 @@
-# from http.server import BaseHTTPRequestHandler
-# from Router.router import PathRouter
-
 from Controller.base_controller import BaseController
 from DAO.DAO import CurrenciesDAO
 
@@ -11,11 +8,13 @@ class ExchangeRate(BaseController):
         self.dao = CurrenciesDAO()
 
     def do_GET(self):
-        pass
-        # params = PathRouter.determine_path_params(BaseHTTPRequestHandler.path)
-        # response = self.dao.get_exchange_rate_by_code(params[0], params[1])
-        # self.send(200, response)
-        # self.dao.close()
+        path = self.handler.path.split('/')[2]
+        path_params = tuple((path[:3], path[3:]))
+        base_currency = self.dao.get_currency_by_code(path_params[0]).get('id')
+        target_currency = self.dao.get_currency_by_code(path_params[1]).get('id')
+        response = self.dao.get_exchange_rate_by_code(base_currency, target_currency)
+        self.send(200, response)
+        self.dao.close()
 
     def do_POST(self):
         pass

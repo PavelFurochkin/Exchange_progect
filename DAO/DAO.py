@@ -63,27 +63,17 @@ class CurrenciesDAO:
     def get_all_currencies(self):
         cursor = self.conn.cursor()
         __raw_list = cursor.execute(f'SELECT * FROM Currencies').fetchall()
-        formatted_list = self.formatted_response(__raw_list)
-        return formatted_list
+        __prepare_list = []
+        for each in __raw_list:
+            __prepare_list.append(self.formatted_response(each))
+        return __prepare_list
 
     def get_all_exchange_rate(self):
         cursor = self.conn.cursor()
         __raw_list = cursor.execute(f'SELECT * FROM ExchangeRates').fetchall()
         __prepare_list = []
         for each in __raw_list:
-            __base_currency = cursor.execute(
-                f'SELECT * FROM Currencies WHERE ID = ?', (each[1],)
-            ).fetchone()
-            __target_currency = cursor.execute(
-                f'SELECT * FROM Currencies WHERE ID = ?', (each[2],)
-            ).fetchone()
-            formatted_data = {
-                "id": each[0],
-                "baseCurrency": self.singl_formatted_response(__base_currency)[0],
-                "targetCurrency": self.singl_formatted_response(__target_currency)[0],
-                "rate": each[3]
-            }
-            __prepare_list.append(formatted_data)
+            __prepare_list.append(self.exchange_formatted_response(each))
         return __prepare_list
 
     def get_exchange_rate_by_code(self, base_currency: str, target_currency: str):
@@ -92,14 +82,15 @@ class CurrenciesDAO:
         try:
             for each in __raw_list:
                 if each[1] == base_currency and each[2] == target_currency:
-                    return each
+                    responce = self.exchange_formatted_response(each)
+                    return responce
         except Exception as error:
             pass
 
     def get_currency_by_code(self, currency_code):
         cursor = self.conn.cursor()
         raw_el = cursor.execute(f'SELECT * FROM Currencies WHERE Code = ?', (currency_code,)).fetchone()
-        __response_code = self.singl_formatted_response(raw_el)
+        __response_code = self.formatted_response(raw_el)
         if __response_code is None:
             raise ValueError
         return __response_code
@@ -113,27 +104,30 @@ class CurrenciesDAO:
         return False
 
     def formatted_response(self, data):
-        final_list = []
-        for each in data:
-            formatted_data = {
-                "id": each[0],
-                "name": each[1],
-                "code": each[2],
-                "sign": each[3]
-            }
-            final_list.append(formatted_data)
-        return final_list
-
-    def singl_formatted_response(self, data):
-        final_list = []
         formatted_data = {
             "id": data[0],
             "name": data[1],
             "code": data[2],
             "sign": data[3]
         }
-        final_list.append(formatted_data)
-        return final_list
+        return formatted_data
+
+    def exchange_formatted_response(self, data):
+        cursor = self.conn.cursor()
+        __base_currency = cursor.execute(
+            f'SELECT * FROM Currencies WHERE ID = ?', (data[1],)
+        ).fetchone()
+        __target_currency = cursor.execute(
+            f'SELECT * FROM Currencies WHERE ID = ?', (data[2],)
+        ).fetchone()
+        formatted_data = {
+            "id": data[0],
+            "baseCurrency": self.formatted_response(__base_currency),
+            "targetCurrency": self.formatted_response(__target_currency),
+            "rate": data[3]
+        }
+        return formatted_data
+
 
     def close(self):
         self.conn.close()
