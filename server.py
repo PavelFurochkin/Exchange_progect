@@ -1,9 +1,7 @@
-import sqlite3
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 from Controller.base_controller import BaseController
 from Router.router import PathRouter
-from DAO.DAO import CurrenciesDAO
 
 
 class OurHandler(BaseHTTPRequestHandler):
@@ -14,6 +12,10 @@ class OurHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         controller: BaseController = self.initiate_controller()
         controller.do_POST()
+
+    def do_PATCH(self):
+        controller: BaseController = self.initiate_controller()
+        controller.do_PATCH()
 
     def initiate_controller(self):
         """ Метод возвращает контроллер в зависимости от пути"""

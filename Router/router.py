@@ -1,16 +1,14 @@
 from urllib.parse import urlparse
 
-from Controller.currencies_controller import CurrenciesController
-from Controller.currency_controller import CurrencyController
-from Controller.exchange_rates_controller import ExchangeRates
-from Controller.exchange_rate_controller import ExchangeRate
-from DAO.DAO import CurrenciesDAO
+from Controller import *
+
 
 routes = {
     'currencies': CurrenciesController,
     'currency': CurrencyController,
     'exchangeRates': ExchangeRates,
-    'exchangeRate': ExchangeRate
+    'exchangeRate': ExchangeRate,
+    'exchange': ExchangeCurrency
 }
 
 class PathRouter:
@@ -20,15 +18,9 @@ class PathRouter:
         path = urlparse(request_path).path
         split_path = path.split('/')
         if len(split_path) >= 2:
-        #     param = split_path[2]
-        #     check_param = CurrenciesDAO().check_code(param)
-        #     if not check_param:
-        #         raise ValueError
-        # if len(split_path) >= 2:
             route = split_path[1]
         else:
             route = '/'
-
         return routes.get(route)
 
     @staticmethod

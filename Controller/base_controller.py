@@ -19,6 +19,9 @@ class BaseController(ABC):
     def do_POST(self):
         pass
 
+    def do_PATCH(self):
+        pass
+
     def send(self, code: int, data):
         json_data = json.dumps(
                     data, default=lambda x: x.__dict__,

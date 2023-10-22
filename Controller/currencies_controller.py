@@ -1,21 +1,19 @@
-import json
-import sqlite3
 from urllib.parse import parse_qs
 from http.client import HTTPException
 
 from Controller.base_controller import BaseController
-from DAO.DAO import CurrenciesDAO
+from DAO import CurrenciesDAO, GetFromDB
 
 
 class CurrenciesController(BaseController):
     def __init__(self, handler):
         super().__init__(handler)
-
         self.dao = CurrenciesDAO()
+        self.from_dao = GetFromDB()
 
     def do_GET(self):
         try:
-            currencies = self.dao.get_all_currencies()
+            currencies = self.from_dao.get_all_currencies()
             self.send(200, currencies)
             self.dao.close()
         except Exception as error:
@@ -39,7 +37,7 @@ class CurrenciesController(BaseController):
                     return
                 else:
                     self.dao.add_currency(code, name, sing)
-                    currency_code = self.dao.get_currency_by_code(code)
+                    currency_code = self.from_dao.get_currency_by_code(code)
                     self.send(200, currency_code)
             else:
                 raise HTTPException
