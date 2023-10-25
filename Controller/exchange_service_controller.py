@@ -1,6 +1,6 @@
 from Controller.base_controller import BaseController
 from urllib.parse import urlparse
-from DAO import CurrenciesDAO, GetFromDB
+from Service.currencies_service import CurrenciesService
 
 
 class ExchangeCurrency(BaseController):
@@ -17,9 +17,8 @@ class ExchangeCurrency(BaseController):
             key, value = item.split('=')
             result_dict[key] = value
 
-
-
-        c=1
+        response = CurrenciesService().converting_currency(result_dict)
+        self.send(200, response)
 
     def do_POST(self):
         pass

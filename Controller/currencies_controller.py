@@ -2,7 +2,7 @@ from urllib.parse import parse_qs
 from http.client import HTTPException
 
 from Controller.base_controller import BaseController
-from DAO import CurrenciesDAO, GetFromDB
+from DAO import CurrenciesDAO, GetFromDB, AddIntoDB
 
 
 class CurrenciesController(BaseController):
@@ -10,6 +10,7 @@ class CurrenciesController(BaseController):
         super().__init__(handler)
         self.dao = CurrenciesDAO()
         self.from_dao = GetFromDB()
+        self.add_in_db = AddIntoDB()
 
     def do_GET(self):
         try:
@@ -36,7 +37,7 @@ class CurrenciesController(BaseController):
                     self.send(400, {'error': error})
                     return
                 else:
-                    self.dao.add_currency(code, name, sing)
+                    self.add_in_db.add_currency(code, name, sing)
                     currency_code = self.from_dao.get_currency_by_code(code)
                     self.send(200, currency_code)
             else:

@@ -9,16 +9,20 @@ class CurrenciesService:
 
         if self.get_db.get_exchange_rate_by_code(request.get('from'), request.get('to')):
             return self.__currency_exchange(
-                request.get('from'), request.get('to'), request.get('amount'), True
+                request.get('from'), request.get('to'), request.get('amount')
             )
         elif self.get_db.get_exchange_rate_by_code(request.get('to'), request.get('from')):
             return self.__currency_exchange(
                 request.get('to'), request.get('from'), request.get('amount'), False
             )
         else:
+            amount_exchange = self.__exchange_via_USD(
+                request.get('from'), request.get('to'), request.get('amount'))
+            result = self.dao.formatting_for_exchange_rates((request.get('from'), request.get('to')))
+            result.update(amount=amount_exchange)
+            return result
 
-
-    def __currency_exchange(self, base_currency, target_currency, amount, right: bool):
+    def __currency_exchange(self, base_currency, target_currency, amount, right: bool = True):
         exchange_pair = self.get_db.get_exchange_rate_by_code(
             base_currency, target_currency)
         converting_result = 0
@@ -38,4 +42,8 @@ class CurrenciesService:
     def __exchange_via_USD(self, base_currency, target_currency, amount):
         change_base = self.get_db.get_exchange_rate_by_code('USD', base_currency)
         change_target = self.get_db.get_exchange_rate_by_code('USD', target_currency)
-        exchange = (float(change_base.get('rate'))* float(amount))/(float(change_target.get('rate'))* float(amount))
+        exchange: float = (float(change_base.get('rate')) *
+                           float(amount))/(float(change_target.get('rate')) *
+                                           float(amount))
+        return exchange
+

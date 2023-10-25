@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from http.server import BaseHTTPRequestHandler
 from http.client import HTTPException
 import sqlite3
+from my_exception import MyError
 
 
 class BaseController(ABC):
@@ -46,6 +47,9 @@ class BaseController(ABC):
             if isinstance(exception, IndexError):
                 error_message = f'Не хватает данных для выполнения'
                 self.send(400, {'error': error_message})
+            if isinstance(exception, MyError):
+                error_message = f'Валютная пара с таким кодом уже существует'
+                self.send(409, {'error': error_message})
         except Exception as error:
             error_message = f'Возникла ошибка {error}'
             self.send(400, {'error': error_message})

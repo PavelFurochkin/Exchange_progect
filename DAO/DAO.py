@@ -1,5 +1,4 @@
 import sqlite3
-from http.client import HTTPException
 
 
 class CurrenciesDAO:
@@ -51,14 +50,7 @@ class CurrenciesDAO:
             cursor.execute("""INSERT INTO ExchangeRates VALUES('3', '2', '4', '0.006')""")
             self.conn.commit()
 
-    def add_currency(self, code: str, fullname: str, sign: str):
-        try:
-            self.conn.cursor().execute(
-                """INSERT INTO Currencies(Code, FullName, Sign) VALUES(?,?,?)""", (code, fullname, sign)
-            )
-            self.conn.commit()
-        except HTTPException:
-            raise HTTPException
+
 
     def check_code(self, code: str):
         check_code = self.conn.cursor().execute(
