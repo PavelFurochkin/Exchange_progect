@@ -1,4 +1,6 @@
 from DAO.DAO import CurrenciesDAO
+from DTO.currency_dto import CurrencyDTO
+from Mapper.mapper import Mapper
 
 class GetFromDB:
     def __init__(self):
@@ -9,7 +11,7 @@ class GetFromDB:
         __raw_list = cursor.execute(f'SELECT * FROM Currencies').fetchall()
         __prepare_list = []
         for each in __raw_list:
-            __prepare_list.append(self.dao.formatting_for_currencies(each))
+            __prepare_list.append(CurrencyDTO(each).to_dict())
         return __prepare_list
 
     def get_all_exchange_rate(self):
@@ -17,24 +19,31 @@ class GetFromDB:
         __raw_list = cursor.execute(f'SELECT * FROM ExchangeRates').fetchall()
         __prepare_list = []
         for each in __raw_list:
-            __prepare_list.append(self.dao.formatting_for_exchange_rates(each))
+            __prepare_list.append(Mapper().exchange_rate_model_to_dao(each))
         return __prepare_list
 
-    def get_exchange_rate_by_code(self, base_currency: str, target_currency: str):
+    def get_exchange_rate_by_id(self, base_currency: int, target_currency: int) -> dict:
         cursor = self.dao.conn.cursor()
         __raw_list = cursor.execute(f'SELECT * FROM ExchangeRates').fetchall()
         try:
             for each in __raw_list:
                 if each[1] == base_currency and each[2] == target_currency:
-                    response = self.dao.formatting_for_exchange_rates(each)
+                    response = Mapper().exchange_rate_model_to_dao(each)
                     return response
         except Exception as error:
             raise ValueError
 
-    def get_currency_by_code(self, currency_code):
+    def get_currency_by_code(self, currency_code) -> dict:
         cursor = self.dao.conn.cursor()
         raw_el = cursor.execute(f'SELECT * FROM Currencies WHERE Code = ?', (currency_code,)).fetchone()
-        __response_code = self.dao.formatting_for_currencies(raw_el)
+        __response_code = CurrencyDTO(raw_el).to_dict()
         if __response_code is None:
             raise ValueError
         return __response_code
+
+    def get_id_by_code(self, code: str):
+        cursor = self.dao.conn.cursor()
+        check_code = cursor.execute(
+            """SELECT ID FROM Currencies WHERE Code = ?""", (code,)
+        ).fetchone()
+        return check_code[0]

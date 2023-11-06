@@ -30,9 +30,11 @@ class ExchangeRates(BaseController):
                 base_currency_code = form_data.get('baseCurrencyCode', '')[0]
                 target_currency_code = form_data.get('targetCurrencyCode', '')[0]
                 rate = float(form_data.get('rate', '')[0])
-                self.add_in_dao.add_exchange_course(base_currency_code, target_currency_code, rate)
-                added_exchange_rate = self.from_dao.get_exchange_rate_by_code(
-                    base_currency_code, target_currency_code)
+                base_currency_id = self.from_dao.get_currency_by_code(base_currency_code).get('id')
+                target_currency_id = self.from_dao.get_currency_by_code(target_currency_code).get('id')
+                self.add_in_dao.add_exchange_course(base_currency_id, target_currency_id, rate)
+                added_exchange_rate = self.from_dao.get_exchange_rate_by_id(
+                    base_currency_id, target_currency_id)
                 self.send(200, added_exchange_rate)
             else:
                 raise HTTPException

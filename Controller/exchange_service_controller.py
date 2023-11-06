@@ -9,16 +9,19 @@ class ExchangeCurrency(BaseController):
         self.handle = handle
 
     def do_GET(self):
-        path_query = urlparse(self.handle.path.split('/')[1]).query
-        path_split = path_query.split('&')
-        result_dict = {}
+        try:
+            path_query = urlparse(self.handle.path.split('/')[1]).query
+            path_split = path_query.split('&')
+            result_dict = {}
 
-        for item in path_split:
-            key, value = item.split('=')
-            result_dict[key] = value
+            for item in path_split:
+                key, value = item.split('=')
+                result_dict[key] = value
 
-        response = CurrenciesService().converting_currency(result_dict)
-        self.send(200, response)
+            response = CurrenciesService().converting_currency(result_dict)
+            self.send(200, response)
+        except Exception as error:
+            self.error_handler(error)
 
     def do_POST(self):
         pass
