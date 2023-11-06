@@ -2,7 +2,29 @@ import sqlite3
 
 
 class CurrenciesDAO:
-    db_name = 'exchange_base.db'
+    """Реализует методы для создания, проверки и обновления базы данных
+
+    Attributes
+    ----------
+    conn
+        Подключает к созданной базе данный
+    __create_table()
+        Создает базу данных, если таковой нет
+
+    Methods
+    -------
+    __create_table()
+        Создает новую базу и наполняет её содержимым, если базы данных нет
+    check_code(code)
+        Проверяет наличие валюты в базе по коду
+    check_id(id)
+        Проверяет наличие валюты в базе по id
+    update_data(pair_id, rate)
+        Меняет обменный курс в существующей базе
+    close()
+        Завершает работу с базой данных
+    """
+    db_name = 'Exchange_base.db'
 
     def __init__(self):
         self.conn = sqlite3.connect(self.db_name)
@@ -50,8 +72,6 @@ class CurrenciesDAO:
             cursor.execute("""INSERT INTO ExchangeRates VALUES('3', '2', '4', '0.006')""")
             self.conn.commit()
 
-
-
     def check_code(self, code: str):
         check_code = self.conn.cursor().execute(
             """SELECT Code FROM Currencies WHERE Code = ?""", (code,)
@@ -60,30 +80,13 @@ class CurrenciesDAO:
             return True
         return False
 
-    def formatting_for_currencies(self, data):
-        formatted_data = {
-            "id": data[0],
-            "name": data[1],
-            "code": data[2],
-            "sign": data[3]
-        }
-        return formatted_data
-
-    def formatting_for_exchange_rates(self, data):
-        cursor = self.conn.cursor()
-        __base_currency = cursor.execute(
-            """SELECT * FROM Currencies WHERE ID = ?""", (data[1],)
+    def check_id(self, id: int):
+        check_code = self.conn.cursor().execute(
+            """SELECT ID FROM Currencies WHERE ID = ?""", (id,)
         ).fetchone()
-        __target_currency = cursor.execute(
-            """SELECT * FROM Currencies WHERE ID = ?""", (data[2],)
-        ).fetchone()
-        formatted_data = {
-            "id": data[0],
-            "baseCurrency": self.formatting_for_currencies(__base_currency),
-            "targetCurrency": self.formatting_for_currencies(__target_currency),
-            "rate": data[3]
-        }
-        return formatted_data
+        if check_code and check_code[0] == id:
+            return True
+        return False
 
     def update_data(self, pair_id: int, rate: float):
         cursor = self.conn.cursor()
