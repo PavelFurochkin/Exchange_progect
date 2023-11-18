@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 
 from Controller import *
 
-
+# Через эндпойнты определяем целевой контроллер
 routes = {
     'currencies': CurrenciesController,
     'currency': CurrencyController,
@@ -12,6 +12,13 @@ routes = {
 }
 
 class PathRouter:
+    """Реализует логику получения обменного курса из базы данных
+
+        Methods
+        -------
+        determine_controller_class_by_path(request_path)
+            Разбирает URL-адрес, вычленяя последний элемент пути
+    """
     @staticmethod
     def determine_controller_class_by_path(request_path: str):
         """ Медод позволяет получить путь"""
@@ -22,10 +29,3 @@ class PathRouter:
         else:
             route = '/'
         return routes.get(route)
-
-    @staticmethod
-    def determine_path_params(request_path: str) -> tuple:
-        """ Метод возвращает компоненты пути в кортеже"""
-        path = urlparse(request_path).path.split('/')[2]
-        path_params = tuple((path[:3], path[3:]))
-        return path_params

@@ -5,6 +5,20 @@ from Router.router import PathRouter
 
 
 class OurHandler(BaseHTTPRequestHandler):
+    """Центральный класс содержащий REST методы и инициализотор контроллера
+
+
+        Methods
+        -------
+        def do_GET()
+            Перенаправляет все методы этого типа соответствующему контроллеру
+        do_POST()
+            Перенаправляет все методы этого типа соответствующему контроллеру
+        do_PATCH()
+            Перенаправляет все методы этого типа соответствующему контроллеру
+        initiate_controller()
+            Осуществляет парсинг URL
+        """
     def do_GET(self):
         controller: BaseController = self.initiate_controller()
         controller.do_GET()
@@ -22,7 +36,7 @@ class OurHandler(BaseHTTPRequestHandler):
         try:
             controller_class = PathRouter.determine_controller_class_by_path(self.path)
             return controller_class(self)
-        except Exception as error:
+        except Exception:
             return self.send_error(404, str(''))
 
 

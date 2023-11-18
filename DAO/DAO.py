@@ -34,7 +34,7 @@ class CurrenciesDAO:
         cursor = self.conn.cursor()
         cursor.execute("""CREATE TABLE IF NOT EXISTS Currencies (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            Code VARCHAR,
+            Code VARCHAR UNIQUE,
             FullName VARCHAR,
             Sign VARCHAR
             );
@@ -71,14 +71,6 @@ class CurrenciesDAO:
             cursor.execute("""INSERT INTO ExchangeRates VALUES('2', '4', '3', '0.95')""")
             cursor.execute("""INSERT INTO ExchangeRates VALUES('3', '2', '4', '0.006')""")
             self.conn.commit()
-
-    def check_code(self, code: str):
-        check_code = self.conn.cursor().execute(
-            """SELECT Code FROM Currencies WHERE Code = ?""", (code,)
-        ).fetchone()
-        if check_code and check_code[0] == code:
-            return True
-        return False
 
     def check_id(self, id: int):
         check_code = self.conn.cursor().execute(

@@ -1,7 +1,7 @@
 from DTO.currency_dto import CurrencyDTO
 
 
-class ExchangeCurrency:
+class ExchangeCurrencyDTO:
     """Создает DTO для конкретной валюты
 
     Attributes

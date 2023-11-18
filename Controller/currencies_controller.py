@@ -53,14 +53,9 @@ class CurrenciesController(BaseController):
                 code: str = form_data.get('code','')[0]
                 name: str = form_data.get('name','')[0]
                 sing: str = form_data.get('sign','')[0]
-                if self.dao.check_code(code):
-                    error = 'Такая валюта уже есть в базе'
-                    self.send(400, {'error': error})
-                    return
-                else:
-                    self.add_in_db.add_currency(code, name, sing)
-                    currency_code = self.from_dao.get_currency_by_code(code)
-                    self.send(200, currency_code)
+                self.add_in_db.add_currency(code, name, sing)
+                currency_code = self.from_dao.get_currency_by_code(code)
+                self.send(200, currency_code)
             else:
                 raise HTTPException
         except Exception as error:

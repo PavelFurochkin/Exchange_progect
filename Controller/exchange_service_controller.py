@@ -7,7 +7,7 @@ from DAO import CurrenciesDAO
 
 
 class ExchangeCurrency(BaseController):
-    """Реализует логику получения обменного курса из базы данных
+    """Контроллер для обраработки эндпойнтов конвертации валют
 
     Attributes
     ----------
